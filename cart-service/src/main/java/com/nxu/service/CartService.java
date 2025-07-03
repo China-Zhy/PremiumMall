@@ -2,6 +2,7 @@ package com.nxu.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.nxu.entity.Cart;
+import com.nxu.model.CartDetail;
 
 import java.util.List;
 
@@ -38,4 +39,21 @@ public interface CartService extends IService<Cart> {
      * @return 删除结果
      */
     boolean deleteCartByCartId(Long cartId);
+
+    /**
+     * 获取用户购物车详情信息
+     *
+     * @param userId 用户ID
+     * @return 购物车详情信息
+     */
+    List<CartDetail> getUserCartDetail(Long userId);
+
+    /**
+     * 商品是否在购物车中
+     *
+     * @param userId    用户ID
+     * @param productId 商品ID
+     * @return 是否存在购物车中
+     */
+    boolean isCartExist(Long userId, Long productId);
 }

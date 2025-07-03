@@ -2,14 +2,21 @@ package com.nxu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.nxu.apis.ProductApi;
 import com.nxu.entity.Favorites;
+import com.nxu.entity.Product;
 import com.nxu.mapper.FavoritesMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites> implements FavoritesService {
+
+    @Autowired
+    private ProductApi productApi;
 
     /**
      * 获取用户的收藏
@@ -18,8 +25,13 @@ public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites
      * @return 收藏集合
      */
     @Override
-    public List<Favorites> getFavoritesByUserId(Long userId) {
-        return this.list(new QueryWrapper<Favorites>().eq("user_id", userId));
+    public List<Product> getFavoritesByUserId(Long userId) {
+        List<Favorites> favorites = this.list(new QueryWrapper<Favorites>().eq("user_id", userId));
+        List<Product> products = new ArrayList<>();
+        for (Favorites favorite : favorites) {
+            products.add(productApi.getOneProduct(favorite.getProductId()));
+        }
+        return products;
     }
 
     /**
@@ -40,7 +52,20 @@ public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites
      * @return 移除结果
      */
     @Override
-    public boolean removeFavorites(long favoritesId) {
+    public boolean removeFavorites(Long favoritesId) {
         return this.removeById(favoritesId);
+    }
+
+    /**
+     * 判断某件商品是否被用户收藏
+     *
+     * @param userId    用户ID
+     * @param productId 商品ID
+     * @return 是否收藏
+     */
+    @Override
+    public boolean isFavoritesExist(Long userId, Long productId) {
+        Favorites one = this.getOne(new QueryWrapper<Favorites>().eq("user_id", userId).eq("product_id", productId));
+        return one != null;
     }
 }

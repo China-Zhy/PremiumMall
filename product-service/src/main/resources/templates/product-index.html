@@ -40,11 +40,7 @@
         </div>
 
         <div class="layui-col-xs12 layui-col-sm12 layui-col-md3 layui-col-lg3 layui-col-xl3" style="margin-top: 15px; margin-bottom: 10px;">
-            <div class="layui-btn-container" hidden="hidden" id="loginBefore" style="text-align: center;">
-                <button class="layui-btn layui-btn-primary layui-border-green" lay-on="login" style="font-weight: bold; letter-spacing: 2px; margin-bottom: 0;"><i class="layui-icon layui-icon-face-smile-b"></i> 登录</button>
-                <button class="layui-btn layui-btn-primary layui-border-green" lay-on="enroll" style="font-weight: bold; letter-spacing: 2px; margin-bottom: 0;"><i class="layui-icon layui-icon-face-smile-b"></i> 注册</button>
-            </div>
-            <div class="layui-btn-container" id="loginAfter" style="text-align: center;">
+            <div class="layui-btn-container" style="text-align: center;">
                 <button class="layui-btn layui-btn-primary layui-border-green" lay-on="cart" style="font-weight: bold; letter-spacing: 2px; margin-bottom: 0;"><i class="layui-icon layui-icon-cart"></i> 购物车</button>
                 <button class="layui-btn layui-btn-primary layui-border-green" lay-on="home" style="font-weight: bold; letter-spacing: 2px; margin-bottom: 0;"><i class="layui-icon layui-icon-username"></i> 个人中心</button>
             </div>
@@ -308,16 +304,73 @@
             noMoreData.hide();
         }
 
+        // 判断用户ID是否存在且合法
+        function checkUserId() {
+            // 从sessionStorage获取ID
+            const id = localStorage.getItem('userId');
+
+            // 检查ID是否存在
+            if (id === null || id === '') {
+                console.log('ID不存在');
+                return false;
+            }
+
+            // 转换为数值并检查是否为有效数字
+            const numericId = Number(id);
+            if (isNaN(numericId)) {
+                console.log('ID不是有效的数字');
+                return false;
+            }
+
+            // 检查是否为整数（对应Java的Long类型）
+            if (!Number.isInteger(numericId)) {
+                console.log('ID不是有效的整数');
+                return false;
+            }
+
+            // 检查数值范围是否在Java Long范围内
+            const isInLongRange = numericId >= -9223372036854775808 &&
+                numericId <= 9223372036854775807;
+            if (!isInLongRange) {
+                console.log('ID超出Java Long范围');
+                return false;
+            }
+            return true;
+        }
+
+        // 用户登录/注册
+        function toLogin() {
+            sessionStorage.setItem('openType', '1');  // 1-前端商城 2-后台系统
+
+            sessionStorage.setItem('openUrl', window.location.href);    // 获取当前网页的完整 URL
+
+            layer.open({
+                type: 2,
+                title: false,
+                content: '/user/user-login',
+                end: function () {
+                    sessionStorage.removeItem('openType');
+                    sessionStorage.removeItem('openUrl');
+                }
+            });
+        }
+
         // 按钮批量事件
         util.on('lay-on', {
-            login: function () {
-                layer.msg('登录');
-            },
-            enroll: function () {
-                layer.msg('注册');
-            },
             cart: function () {
-                layer.msg('购物车');
+                if (checkUserId()) {
+                    layer.open({
+                        type: 2,
+                        offset: 'r',
+                        anim: 'slideLeft',
+                        area: ['600px', '100%'],
+                        shade: 0.3,
+                        shadeClose: true,
+                        content: '/cart/toUserCartHtml/' + localStorage.getItem('userId')
+                    });
+                } else {
+                    toLogin();
+                }
             },
             home: function () {
                 layer.msg('个人中心');

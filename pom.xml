@@ -110,7 +110,6 @@
                 <version>${lombok.version}</version>
                 <optional>true</optional>
             </dependency>
-
         </dependencies>
     </dependencyManagement>
 

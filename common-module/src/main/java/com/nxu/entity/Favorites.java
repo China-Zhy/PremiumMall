@@ -7,7 +7,7 @@ import lombok.Data;
  * 我的收藏信息
  */
 @Data
-@TableName("collection")
+@TableName("favorites")
 public class Favorites {
     private long id;                        // 收藏ID
     private long userId;                    // 用户ID

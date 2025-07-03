@@ -10,7 +10,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum YesNoStatus {
-    NO(0, "否"), YES(1, "是");
+    YES(1, "是"), NO(2, "否");
 
     @EnumValue // 告诉MyBatis-Plus将枚举的哪个属性映射到数据库字段
     private final Integer code;

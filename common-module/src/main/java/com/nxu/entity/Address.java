@@ -21,5 +21,5 @@ public class Address {
     private String cityName;                // 城市名称
     private String districtName;            // 地区名称
     private String addressDetail;           // 详细地址
-    private YesNoStatus isDefault;          // 是否默认地址 (0-否，1-是)
+    private YesNoStatus isDefault;          // 是否默认地址 (1-是，2-否)
 }

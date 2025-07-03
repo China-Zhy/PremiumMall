@@ -17,7 +17,7 @@ public class CartController {
     // 获取用户购物车页面
     @GetMapping("/toUserCartHtml/{userId}")
     public String toUserCartHtml(@PathVariable Long userId, Model model) {
-        model.addAttribute("cartList", cartService.getCartByUserId(userId));
+        model.addAttribute("cartDetail", cartService.getUserCartDetail(userId));
         return "user-cart";
     }
 
@@ -25,8 +25,30 @@ public class CartController {
     @PostMapping("/addCart")
     @ResponseBody
     public boolean addCart(@RequestBody Cart cart) {
-        System.out.println("购物车信息：" + cart);
+        System.out.println("\n添加的购物车信息：" + cart + "\n");
         return cartService.addCart(cart);
+    }
+
+    // 删除购物车
+    @GetMapping("/delCart/{id}")
+    @ResponseBody
+    public boolean delCart(@PathVariable Long id) {
+        return cartService.deleteCartByCartId(id);
+    }
+
+    // 更新购物车
+    @PostMapping("/updateCart")
+    @ResponseBody
+    public boolean updateCart(@RequestBody Cart cart) {
+        System.out.println("\n更新的购物车信息：" + cart + "\n");
+        return cartService.updateCart(cart);
+    }
+
+    // 判断某商品是否在用户的购物车中
+    @GetMapping("/isCartExist")
+    @ResponseBody
+    public boolean isCartExist(@RequestParam Long userId, @RequestParam Long productId) {
+        return cartService.isCartExist(userId, productId);
     }
 
 }

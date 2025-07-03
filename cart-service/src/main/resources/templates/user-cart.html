@@ -1,10 +1,190 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8">
+    <title>我的购物车</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/layui/css/layui.css" rel="stylesheet">
 </head>
+
 <body>
-我的购物车
+<div class="layui-bg-gray layui-padding-2">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <div class="layui-col-space16">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-col-xs12 layui-col-sm12 layui-col-md12 layui-col-lg12 layui-col-xl12">
+
+                        <!--购物车商品列表-->
+                        <div class="layui-card layui-padding-1 layui-anim layui-anim-scale" th:each="detail : ${cartDetail}" th:id="'card'+${detail.cart.id}">
+                            <div class="layui-card-header">
+                                <div style="float: left; padding-top: 2px;">
+                                    <input type="checkbox" th:data-product-id="${detail.product.id}" th:checked="${detail.cart.selected.code == 1}">
+                                </div>
+                                <span style="font-weight: bold; font-size: 20px;" th:text="${detail.product.name}"></span>
+                                <div style="float: right;">
+                                    <button type="button" th:data-cart-id="${detail.cart.id}" class="layui-btn layui-btn-sm layui-btn-normal" lay-on="remove">删 除</button>
+                                </div>
+                            </div>
+                            <div class="layui-card-body">
+                                <div class="layui-row layui-col-space20">
+                                    <div class="layui-col-xs4 layui-col-sm4 layui-col-md4 layui-col-lg4 layui-col-xl4" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                                        <a th:href="@{/product/productDetail/(${detail.product.id})}" target="_blank"><img th:src="${detail.product.mainImage}" style="height: 140px; aspect-ratio: 1/1;" alt=""></a>
+                                    </div>
+                                    <div class="layui-col-xs8 layui-col-sm8 layui-col-md8 layui-col-lg8 layui-col-xl8">
+
+                                        <!--商品SKU信息-->
+                                        <select th:data-product-id="${detail.product.id}" th:data-cart-id="${detail.cart.id}">
+                                            <option th:each="sku : ${detail.skuList}" th:value="${sku.id}" th:data-price="${sku.price}" th:text="${sku.attributes}" th:selected="${sku.id == detail.cart.skuId}"></option>
+                                        </select>
+
+                                        <div class="layui-col-xs12 layui-col-sm12 layui-col-md12 layui-col-lg12 layui-col-xl12" style="margin-top: 10px;">
+                                            <label class="layui-form-label">数 量：</label>
+                                            <div class="layui-input-block">
+                                                <input type="number" th:id="'count'+${detail.product.id}" th:data-product-id="${detail.product.id}" th:data-cart-id="${detail.cart.id}" th:value="${detail.cart.quantity}" autocomplete="off" class="layui-input" min="1" step="1" lay-affix="number"
+                                                       style="text-align: center;">
+                                            </div>
+                                        </div>
+
+                                        <div class="layui-col-xs12 layui-col-sm12 layui-col-md12 layui-col-lg12 layui-col-xl12" style="margin-top: 10px;">
+                                            <label class="layui-form-label" style="width: 100%; font-weight: bold; color: #ff5722;">价 格：<span th:id="'price'+${detail.product.id}" th:text="${detail.product.price}"></span>元</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--结算区域-->
+                        <div class="layui-card layui-padding-1">
+                            <div class="layui-card-body">
+                                <div class="layui-row">
+                                    <div class=" layui-col-xs7 layui-col-sm7 layui-col-md7 layui-col-lg7 layui-col-xl7">
+                                        <p style="font-weight: bold;font-size: 24px;">总计：<span id="total" style="color: #ff5722;"></span> 元</p>
+                                    </div>
+                                    <div class=" layui-col-xs5 layui-col-sm5 layui-col-md5 layui-col-lg5 layui-col-xl5">
+                                        <button type="button" class="layui-btn layui-btn-fluid" style="letter-spacing: 2px; font-weight: bold;" lay-on="goToPay">前往支付</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script>
+    layui.use(['layer', 'util', 'jquery', 'form'], function (layer, util, $, form) {
+
+        calculateTotalPrice();  // 初始化购物车总金额
+        form.render();
+
+        let cartInfo = {};
+
+        // 更新购物车信息
+        function updateCart(data) {
+            console.log('更新信息')
+            $.ajax({
+                url: '/cart/updateCart',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (!res) {
+                        layer.msg('购物车修改失败');
+                    }
+                },
+                error: function () {
+                    layer.msg('接口请求异常', {icon: 5});
+                }
+            });
+        }
+
+        // 商品是否选中事件
+        form.on('checkbox', function (data) {
+            let isSelected;
+            if (data.elem.checked) {
+                isSelected = 1;
+            } else {
+                isSelected = 0;
+            }
+            calculateTotalPrice();
+            cartInfo = {
+                "id": data.elem.value,  // 购物车ID
+                "selected": isSelected  // 是否选中 (0-否，1-是)
+            }
+            updateCart(cartInfo);   // 更新购物车
+        });
+
+        // SKU选择事件
+        form.on('select', function (data) {
+            calculateSomeonePrice($(data.elem).data('product-id'));
+            calculateTotalPrice();
+            cartInfo = {
+                "id": $(data.elem).data('cart-id'),  // 购物车ID
+                "skuId": $('select[data-product-id="' + $(data.elem).data('product-id') + '"]').find('option:selected').val()   // SKU的ID
+            }
+            updateCart(cartInfo);   // 更新购物车
+        });
+
+        // 数量输入框事件
+        form.on('input-affix', function (data) {
+            calculateSomeonePrice($(data.elem).data('product-id'));
+            calculateTotalPrice();
+            cartInfo = {
+                "id": $(data.elem).data('cart-id'),     // 购物车ID
+                "quantity": $('#count' + $(data.elem).data('product-id')).val()   // 商品数量
+            }
+            updateCart(cartInfo);   // 更新购物车
+        });
+
+        // 计算某个商品数量或是SKU选择变化时的价格
+        function calculateSomeonePrice(productId) {
+            let price = $('select[data-product-id="' + productId + '"]').find('option:selected').data('price');
+            let count = $('#count' + productId).val();
+            $('#price' + productId).text((price * count).toFixed(2));
+        }
+
+        // 计算当前页面中复选框选中的商品的总价，就是把每个id=price+productId的数值求和
+        function calculateTotalPrice() {
+            let total = 0;
+            $('input[type="checkbox"]:checked').each(function () {
+                total += parseFloat($('#price' + $(this).data('product-id')).text());
+            });
+            $('#total').text(total.toFixed(2));
+        }
+
+        // 按钮的点击事件
+        util.on('lay-on', {
+            remove: function (data) {
+                layer.confirm('是否删除此商品？', {
+                    btn: ['确定', '取消']
+                }, function () {
+                    let id = $(data).data('cart-id');
+                    $('#card' + id).hide(500); // 0.5秒内逐渐隐藏
+                    $.get('/cart/delCart/' + id, function (res) {
+                        if (res) {
+                            $('#card' + id).hide(500); // 0.5秒内逐渐隐藏
+                            layer.msg('删除成功');
+                            calculateTotalPrice();
+                        } else {
+                            layer.msg('删除失败');
+                        }
+                    });
+                });
+            },
+            goToPay: function () {
+                layer.msg('前往支付');
+            }
+        });
+
+        util.fixbar();  // 回到顶部
+    });
+</script>
 </body>
+
 </html>

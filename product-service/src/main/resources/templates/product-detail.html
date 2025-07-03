@@ -2,8 +2,10 @@
 <html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>商品详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="/layui/css/layui.css" rel="stylesheet">
     <style>
         /* 颜色选项样式 */
@@ -58,18 +60,15 @@
         </div>
 
         <div class="layui-col-xs12 layui-col-sm8 layui-col-md8 layui-col-lg8 layui-col-xl5" style="margin-top: 15px; margin-bottom: 10px;">
-            <div class="layui-btn-container" style="text-align: right;" id="loginBefore" hidden="hidden">
-                <button class="layui-btn layui-btn-primary layui-border-green" style="font-weight: bold; letter-spacing: 2px;" lay-on="login"><i class="layui-icon layui-icon-face-smile-b"></i> 登录</button>
-                <button class="layui-btn layui-btn-primary layui-border-green" style="font-weight: bold; letter-spacing: 2px;" lay-on="enroll"><i class="layui-icon layui-icon-face-smile-b"></i> 注册</button>
-            </div>
-            <div class="layui-btn-container" style="text-align: right;" id="loginAfter" hidden="hidden">
-                <button class="layui-btn layui-btn-primary layui-border-green" style="font-weight: bold; letter-spacing: 2px; margin-bottom: 0;" lay-on="collect"><i class="layui-icon layui-icon-rate"></i> 收藏此商品</button>
+            <div class="layui-btn-container" style="text-align: right;">
+                <button id="collect" class="layui-btn layui-btn-primary layui-border-green" style="font-weight: bold; letter-spacing: 2px; margin-bottom: 0;" lay-on="collect"><i class="layui-icon layui-icon-rate"></i> 收藏此商品</button>
                 <button class="layui-btn layui-btn-primary layui-border-green" style="font-weight: bold; letter-spacing: 2px; margin-bottom: 0;" lay-on="myCart"><i class="layui-icon layui-icon-cart"></i> 我的购物车</button>
             </div>
         </div>
     </div>
 </div>
 
+<!--商品详情内容-->
 <div class="layui-padding-2" id="content" style="margin-top: 100px;">
     <div class="layui-row layui-col-space20">
 
@@ -89,7 +88,7 @@
 
             <div class="color-options" id="color-options">
                 <!-- 绑定id和price -->
-                <div th:each="sku : ${detail.skus}" th:data-id="${sku.id}" th:data-price="${sku.price}" class="color-option" data-value="red" th:text="${sku.attributes}"></div>
+                <div th:each="sku : ${detail.skus}" th:data-sku-id="${sku.id}" th:data-price="${sku.price}" class="color-option" th:text="${sku.attributes}"></div>
             </div>
 
             <br>
@@ -100,6 +99,7 @@
                         <label class="layui-form-label">数 量：</label>
                         <div class="layui-input-block">
                             <input type="number" id="count" autocomplete="off" class="layui-input" min="1" step="1" value="1" lay-affix="number" lay-filter="count" style="text-align: center;">
+                            <input type="number" hidden="hidden" id="productId" th:value="${detail.product.id}">
                         </div>
                     </div>
                     <div class="layui-col-xs12 layui-col-sm12 layui-col-md4 layui-col-lg4 layui-col-xl4">
@@ -112,11 +112,11 @@
             </div>
 
             <div class="layui-col-xs12 layui-col-sm6 layui-col-md6 layui-col-lg6 layui-col-xl6">
-                <button class="layui-btn layui-btn-primary layui-border-green layui-btn-fluid" style="font-weight: bold; letter-spacing: 2px;" lay-on="addCart"><i class="layui-icon layui-icon-add-1"></i> 加入购物车</button>
+                <button id="addCart" class="layui-btn layui-btn-primary layui-border-green layui-btn-fluid" style="font-weight: bold; letter-spacing: 2px;" lay-on="addCart"><i class="layui-icon layui-icon-add-1"></i> 加入购物车</button>
             </div>
 
             <div class="layui-col-xs12 layui-col-sm6 layui-col-md6 layui-col-lg6 layui-col-xl6">
-                <button class="layui-btn layui-btn-primary layui-border-green layui-btn-fluid" style="font-weight: bold; letter-spacing: 2px;" lay-on="buy"><i class="layui-icon layui-icon-ok"></i> 立即购买</button>
+                <button id="toBuy" class="layui-btn layui-btn-primary layui-border-green layui-btn-fluid" style="font-weight: bold; letter-spacing: 2px;" lay-on="buy"><i class="layui-icon layui-icon-ok"></i> 立即购买</button>
             </div>
         </div>
 
@@ -242,10 +242,44 @@
 <script>
     layui.use(['jquery', 'util', 'carousel', 'form', 'layer'], function ($, util, carousel, form, layer) {
 
+        // 页面初始化
+        $(function () {
+            $('.color-option:not(.disabled)').click(function () {
+                $('.color-option').removeClass('selected');
+                $(this).addClass('selected');
+
+                // 获取选中的价格
+                let selectedPrice = $(this).data('price');
+                $('#price').text(selectedPrice);
+
+                // 获取数量
+                let count = $('#count').val();
+
+                // 计算总计
+                $('#total').text(selectedPrice * count);
+            });
+
+            if (checkUserId()) {
+                // 判断商品是否收藏
+                $.get('/favorites/isFavoritesExist',
+                    {
+                        "userId": localStorage.getItem('userId'),
+                        "productId": $('#productId').val()
+                    },
+                    function (res) {
+                        if (res) {
+                            $('#collect').addClass('layui-btn-disabled');
+                            $('#collect').html('<i class="layui-icon layui-icon-rate-solid"></i> 商品已收藏');
+                        }
+                    });
+            }
+
+        });
+
         // 判断用户ID是否存在且合法
         function checkUserId() {
             // 从sessionStorage获取ID
-            const id = sessionStorage.getItem('userId');
+            const id = localStorage.getItem('userId');
 
             // 检查ID是否存在
             if (id === null || id === '') {
@@ -273,44 +307,8 @@
                 console.log('ID超出Java Long范围');
                 return false;
             }
-
-            console.log('ID存在且有效:', numericId);
             return true;
         }
-
-        // 登录注册按钮的显示和隐藏
-        function isShowLogin() {
-            if (checkUserId()) {
-                $('#loginBefore').hide();
-                $('#loginAfter').show();
-            } else {
-                $('#loginBefore').show();
-                $('#loginAfter').hide();
-            }
-        }
-
-        // 页面初始化
-        $(function () {
-
-            isShowLogin();
-
-            $('.color-option:not(.disabled)').click(function () {
-                $('.color-option').removeClass('selected');
-                $(this).addClass('selected');
-
-                // 获取选中的价格
-                let selectedPrice = $(this).data('price');
-                console.log(selectedPrice)
-                $('#price').text(selectedPrice);
-
-                // 获取数量
-                let count = $('#count').val();
-                console.log(count)
-
-                // 计算总计
-                $('#total').text(selectedPrice * count);
-            });
-        });
 
         // 渲染-图片轮播
         carousel.render({
@@ -326,41 +324,99 @@
             $('#total').text($('#price').text() * count);
         });
 
+        // 用户登录/注册
+        function toLogin() {
+            sessionStorage.setItem('openType', '1');  // 1-前端商城 2-后台系统
+
+            sessionStorage.setItem('openUrl', window.location.href);    // 获取当前网页的完整 URL
+
+            layer.open({
+                type: 2,
+                title: false,
+                content: '/user/user-login',
+                end: function () {
+                    sessionStorage.removeItem('openType');
+                    sessionStorage.removeItem('openUrl');
+                }
+            });
+        }
+
         // 按钮批量事件
         util.on('lay-on', {
-            login: function () {
-                sessionStorage.setItem('openType', '1');  // 1-前端商城 2-后台系统
-                layer.open({
-                    type: 2,
-                    title: false, // 不显示标题栏
-                    content: '/user/user-login',
-                    success: function (layero, index, that) {
-                        layer.full(index); // 最大化
-                    },
-                    end: function () {
-                        isShowLogin();  // 隐藏登录注册按钮
-                    }
-                });
-            },
-            enroll: function () {
-                sessionStorage.setItem('openType', '1');  // 1-前端商城 2-后台系统
-                layer.open({
-                    type: 2,
-                    title: false, // 不显示标题栏
-                    content: '/user/user-enroll',
-                    success: function (layero, index, that) {
-                        layer.full(index); // 最大化
-                    }
-                });
-            },
             collect: function () {
-                layer.msg('收藏');
+                if (checkUserId()) {
+                    $.ajax({
+                        url: '/favorites/addFavorite',
+                        type: 'GET',
+                        data: {
+                            "userId": localStorage.getItem('userId'),
+                            "productId": $('#productId').val()
+                        },
+                        success: function (res) {
+                            if (res) {
+                                layer.msg('已收藏', {icon: 1});
+                                $('#collect').addClass('layui-btn-disabled');
+                                $('#collect').html('<i class="layui-icon layui-icon-rate-solid"></i> 已收藏');
+                            } else {
+                                layer.msg('收藏失败', {icon: 2});
+                            }
+                        },
+                        error: function () {
+                            layer.msg('接口请求异常', {icon: 5});
+                        }
+                    });
+                } else {
+                    toLogin();
+                }
             },
             myCart: function () {
-                layer.msg('购物车');
+                if (checkUserId()) {
+                    layer.open({
+                        type: 2,
+                        offset: 'r',
+                        anim: 'slideLeft',
+                        area: ['600px', '100%'],
+                        shade: 0.3,
+                        shadeClose: true,
+                        content: '/cart/toUserCartHtml/' + localStorage.getItem('userId')
+                    });
+                } else {
+                    toLogin();
+                }
             },
             addCart: function () {
-                layer.msg('添加购物车');
+                // 获取选中的SKU
+                let selectedSku = $('.color-option.selected');
+
+                // 检查是否有选中的SKU
+                if (selectedSku.length === 0) {
+                    layer.msg('请选择商品规格');
+                    return;
+                }
+
+                // 添加购物车
+                $.ajax({
+                    url: '/cart/addCart',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        "userId": localStorage.getItem('userId'),
+                        "productId": $('#productId').val(),
+                        "skuId": selectedSku.data('sku-id'),
+                        "quantity": $('#count').val()
+                    }),
+                    success: function (res) {
+                        if (res) {
+                            layer.msg('成功添加到购物车', {icon: 1});
+                            $('#addCart').addClass('layui-btn-disabled');
+                        } else {
+                            layer.msg('添加到购物车失败', {icon: 2});
+                        }
+                    },
+                    error: function () {
+                        layer.msg('接口请求异常', {icon: 5});
+                    }
+                });
             },
             buy: function () {
                 layer.msg('购买');

@@ -41,4 +41,11 @@ public class ProductController {
         model.addAttribute("detail", productService.getProductDetail(id));
         return "product-detail";
     }
+
+    // 某个商品的信息
+    @GetMapping("/someoneProduct/{id}")
+    @ResponseBody
+    public Product getOneProduct(@PathVariable Long id) {
+        return productService.getById(id);
+    }
 }

@@ -27,4 +27,4 @@ spring:
         - id: cart-service  # 路由ID，唯一标识
           uri: lb://cart-service  # 目标服务地址，lb表示负载均衡
           predicates: # 路由断言，匹配请求路径
-            - Path=/cart/**
+            - Path=/cart/**,/favorites/**

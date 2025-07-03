@@ -161,12 +161,16 @@
                             break;
                         case 1:
                             layer.msg('登录成功，欢迎您', {icon: 1});
-                            sessionStorage.setItem('userId', res.userId);
+                            localStorage.setItem('userId', res.userId);
 
                             let type = sessionStorage.getItem('openType'); // 1-前端商城 2-后台系统
+                            let url = sessionStorage.getItem('openUrl');
+                            sessionStorage.removeItem('openType');
+                            sessionStorage.removeItem('openUrl');
+
                             setTimeout(function () {
                                 if (type === '1') {
-                                    parent.layer.close(parent.layer.getFrameIndex(window.name)); // 关闭弹出层
+                                    window.location = url;
                                 } else if (type === '2') {
                                     window.location = '/user/user-list'; // 后续要更改
                                 } else {
