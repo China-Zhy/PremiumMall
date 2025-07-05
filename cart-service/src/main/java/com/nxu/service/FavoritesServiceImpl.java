@@ -29,7 +29,9 @@ public class FavoritesServiceImpl extends ServiceImpl<FavoritesMapper, Favorites
         List<Favorites> favorites = this.list(new QueryWrapper<Favorites>().eq("user_id", userId));
         List<Product> products = new ArrayList<>();
         for (Favorites favorite : favorites) {
-            products.add(productApi.getOneProduct(favorite.getProductId()));
+            Product oneProduct = productApi.getOneProduct(favorite.getProductId());
+            oneProduct.setStock(favorite.getId());      // 把收藏ID存入商品库存(后续需要优化)
+            products.add(oneProduct);
         }
         return products;
     }

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>添加收货地址</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+</head>
+<body>
+<div class="layui-margin-3 layui-anim layui-anim-upbit">
+    <div class="layui-row">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <div>
+                    <label class="layui-form-label">收货地址</label>
+                    <div class="layui-input-inline">
+                        <select id="quiz1" lay-verify="required" lay-filter="quiz1" name="provinceCode">
+                            <option value="">请选择省</option>
+                            <option th:each="a : ${areaList}" th:value="${a.code}" th:text="${a.name}"></option>
+                        </select>
+                    </div>
+                    <div class="layui-input-inline">
+                        <select id="quiz2" lay-verify="required" lay-filter="quiz2" name="cityCode">
+
+                        </select>
+                    </div>
+                    <div class="layui-input-inline">
+                        <select id="quiz3" lay-verify="required" lay-filter="quiz3" name="districtCode">
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <label class="layui-form-label">详细地址</label>
+                <div class="layui-input-block">
+                    <input type="text" id="quiz4" name="addressDetail" autocomplete="off" class="layui-input" lay-verify="required">
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <label class="layui-form-label">收货姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="receiverName" autocomplete="off" class="layui-input" lay-verify="required|myVerify">
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <label class="layui-form-label">手机号码</label>
+                <div class="layui-input-block">
+                    <input type="text" name="receiverPhone" autocomplete="off" class="layui-input" lay-verify="required|phone">
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <label class="layui-form-label">默认地址</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="isDefault" value="1" title="是">
+                    <input type="radio" name="isDefault" value="2" title="否" checked>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="layui-btn" lay-submit lay-filter="toDo">添 加</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script>
+    layui.use(['form', 'layer', 'jquery'], function (form, layer, $) {
+        // 监听一级选择事件
+        form.on('select(quiz1)', function (data) {
+            let quiz1 = data.value;
+            if (quiz1) {
+                // 清空市和县/区的选择框
+                $('#quiz2').html('<option value="">请选择市</option>');
+                $('#quiz3').html('');
+                form.render('select');
+
+                // 请求二级列表
+                $.get('/address/getArea/2/' + quiz1, function (data) {
+                    $.each(data, function (index, info) {
+                        $('#quiz2').append('<option value="' + info.code + '">' + info.name + '</option>');
+                    });
+                    form.render('select');
+                }).fail(function () {
+                    layer.msg('请求二级列表失败', {icon: 2});
+                });
+            }
+        });
+
+        // 监听二级选择事件
+        form.on('select(quiz2)', function (data) {
+            let quiz2 = data.value;
+            if (quiz2) {
+                // 清空县区选择框
+                $('#quiz3').html('<option value="">请选择县/区</option>');
+                form.render('select');
+
+                // 请求县区列表
+                $.get('/address/getArea/3/' + quiz2, function (data) {
+                    $.each(data, function (index, info) {
+                        $('#quiz3').append('<option value="' + info.code + '">' + info.name + '</option>');
+                    });
+                    form.render('select');
+                }).fail(function () {
+                    layer.msg('请求三级列表失败', {icon: 2});
+                });
+            }
+        });
+
+        // 身份证姓名验证正则表达式（支持汉字和间隔符·）
+        const idCardNameRegex = /^[\u4e00-\u9fa5·]{2,30}$/;
+
+        // 自定义验证规则，验证收货人名合法
+        form.verify({
+            myVerify: function (value) {
+                if (idCardNameRegex.test(value)) {
+                    // 检查间隔符是否正确
+                    if (value.startsWith('·') || value.endsWith('·')) {
+                        return '间隔符·位置不正确';
+                    }
+                    if ((value.split('·').length - 1) > 1) {
+                        return '间隔符·数量不正确';
+                    }
+                } else {
+                    return '姓名输入有误，请按照身份证上的姓名填写';
+                }
+            }
+        });
+
+        // 最终表单提交事件
+        form.on('submit(toDo)', function (data) {
+            let field = data.field; // 获取表单字段值
+
+            field.userId = localStorage.getItem('userId');
+            field.provinceName = $('#quiz1 option:selected').text();
+            field.cityName = $('#quiz2 option:selected').text();
+            field.districtName = $('#quiz3 option:selected').text();
+
+            // 添加收货地址
+            $.ajax({
+                url: '/address/addUserAddress',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(field),
+                success: function (res) {
+                    if (res.result) {
+                        field.id = res.code;    // 新地址ID
+                        // 将数据传递给父页面
+                        parent.addNewAddressCard(field);
+                        parent.layer.close(parent.layer.getFrameIndex(window.name));    // 关闭弹出层
+                    } else {
+                        layer.msg('添加失败', {icon: 2});
+                    }
+                },
+                error: function () {
+                    layer.msg('Ajax请求异常', {icon: 0});
+                }
+            });
+            return false; // 阻止默认 form 跳转
+        });
+    });
+</script>
+</body>
+</html>

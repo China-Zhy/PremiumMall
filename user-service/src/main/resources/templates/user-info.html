@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人信息</title>
+    <link href="/layui/css/layui.css" rel="stylesheet">
+</head>
+<body>
+<div class="layui-margin-3 layui-anim layui-anim-upbit" style="width: 400px;">
+    <div class="layui-row">
+        <div class="layui-col-md12">
+            <form class="layui-form layui-form-pane">
+                <div class="layui-form-item layui-col-space16">
+
+                    <div class="layui-col-md12">
+                        <div class="layui-col-md12">
+                            <div class="layui-panel" style="aspect-ratio: 1/1;">
+                                <img id="ID-upload-demo-img" th:src="${user.avatar}" style="width: 100%; height: 100%;">
+                            </div>
+                        </div>
+                        <div class="layui-col-md12" style="margin-top: 10px;">
+                            <button type="button" class="layui-btn layui-btn-primary layui-btn-sm layui-btn-fluid" id="ID-upload-demo-btn">
+                                <i class="layui-icon layui-icon-upload"></i> 更换头像
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md12">
+                        <label class="layui-form-label">我的昵称：</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="name" autocomplete="off" class="layui-input" lay-verify="required" th:value="${user.name}">
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md12">
+                        <label class="layui-form-label">手机号码：</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="phone" autocomplete="off" class="layui-input" lay-verify="required|phone" th:value="${user.phone}">
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md12">
+                        <label class="layui-form-label">电子邮箱：</label>
+                        <div class="layui-input-block">
+                            <input type="text" name="card" autocomplete="off" class="layui-input" lay-verify="required|email" th:value="${user.email}">
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md12">
+                        <label class="layui-form-label">账户密码：</label>
+                        <div class="layui-input-block">
+                            <input type="password" name="password" autocomplete="off" class="layui-input" lay-verify="required" th:value="${user.password}">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="layui-form-item layui-col-space20">
+                    <div class="layui-col-md12" style="text-align: center;">
+                        <button class="layui-btn layui-btn-fluid" lay-submit lay-filter="toDo">保 存</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="/layui/layui.js"></script>
+<script>
+    layui.use(['form', 'layer', 'jquery', 'upload'], function (form, layer, $, upload) {
+
+        // 单图片上传
+        let uploadInst = upload.render({
+            elem: '#ID-upload-demo-btn',
+            url: '', // 实际使用时改成您自己的上传接口即可。
+            before: function (obj) {
+                // 预读本地文件示例，不支持ie8
+                obj.preview(function (index, file, result) {
+                    $('#ID-upload-demo-img').attr('src', result); // 图片链接（base64）
+                });
+            },
+            done: function (res) {
+                // 若上传失败
+                if (res.code > 0) {
+                    return layer.msg('上传失败');
+                }
+                // 上传成功的一些操作
+                $('#ID-upload-demo-text').html(''); // 置空上传失败的状态
+            },
+            error: function () {
+                // 演示失败状态，并实现重传
+                let demoText = $('#ID-upload-demo-text');
+                demoText.html('<span style="color: #FF5722;">上传失败</span>&ensp;<a class="layui-btn layui-bg-purple layui-btn-xs demo-reload">点我重试</a>');
+                demoText.find('.demo-reload').on('click', function () {
+                    uploadInst.upload();
+                });
+            }
+        });
+
+        // 提交事件
+        form.on('submit(toDo)', function (data) {
+            let field = data.field; // 获取表单字段值
+
+            $.ajax({
+                url: '/doAddMedicine',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(field),
+                success: function (res) {
+                    if (res.code) {
+                        layer.msg('添加成功！', {icon: 1});
+                        setTimeout(function () {
+                            parent.layer.close(parent.layer.getFrameIndex(window.name));    // 关闭弹出层
+                        }, 2000);
+                    } else {
+                        layer.msg('添加失败！', {icon: 2});
+                    }
+                },
+                error: function (err) {
+                    layer.msg('Ajax请求异常！', {icon: 0});
+                }
+            });
+            return false; // 阻止默认 form 跳转
+        });
+    });
+</script>
+</body>
+</html>

@@ -356,7 +356,7 @@
                             if (res) {
                                 layer.msg('已收藏', {icon: 1});
                                 $('#collect').addClass('layui-btn-disabled');
-                                $('#collect').html('<i class="layui-icon layui-icon-rate-solid"></i> 已收藏');
+                                $('#collect').html('<i class="layui-icon layui-icon-rate-solid"></i> 商品已收藏');
                             } else {
                                 layer.msg('收藏失败', {icon: 2});
                             }
@@ -373,10 +373,11 @@
                 if (checkUserId()) {
                     layer.open({
                         type: 2,
+                        title: false,
+                        closeBtn: 0,
                         offset: 'r',
                         anim: 'slideLeft',
                         area: ['600px', '100%'],
-                        shade: 0.3,
                         shadeClose: true,
                         content: '/cart/toUserCartHtml/' + localStorage.getItem('userId')
                     });
@@ -419,7 +420,16 @@
                 });
             },
             buy: function () {
-                layer.msg('购买');
+                // 获取选中的SKU
+                let selectedSku = $('.color-option.selected');
+
+                // 检查是否有选中的SKU
+                if (selectedSku.length === 0) {
+                    layer.msg('请选择商品规格');
+                    return;
+                }
+
+                window.location = '/address/getUserAddressHtml/' + localStorage.getItem('userId')
             }
         });
 

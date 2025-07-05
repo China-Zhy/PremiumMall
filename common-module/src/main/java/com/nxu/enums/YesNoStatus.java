@@ -1,6 +1,7 @@
 package com.nxu.enums;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,6 +14,7 @@ public enum YesNoStatus {
     YES(1, "是"), NO(2, "否");
 
     @EnumValue // 告诉MyBatis-Plus将枚举的哪个属性映射到数据库字段
+    @JsonValue // 告诉Jackson使用code值进行序列化和反序列化
     private final Integer code;
     private final String description;
 

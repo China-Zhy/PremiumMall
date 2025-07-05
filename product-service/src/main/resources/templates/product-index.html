@@ -361,10 +361,11 @@
                 if (checkUserId()) {
                     layer.open({
                         type: 2,
+                        title: false,
+                        closeBtn: 0,
                         offset: 'r',
                         anim: 'slideLeft',
                         area: ['600px', '100%'],
-                        shade: 0.3,
                         shadeClose: true,
                         content: '/cart/toUserCartHtml/' + localStorage.getItem('userId')
                     });
@@ -373,7 +374,17 @@
                 }
             },
             home: function () {
-                layer.msg('个人中心');
+                layer.open({
+                    type: 2,
+                    title: false,
+                    closeBtn: 0,
+                    offset: 't',
+                    anim: 'slideDown',
+                    area: ['100%', '250px'],
+                    shade: 0.5,
+                    shadeClose: true,
+                    content: '/user/index/' + localStorage.getItem('userId')
+                });
             },
             clear: function () {
                 searchInput.val('');

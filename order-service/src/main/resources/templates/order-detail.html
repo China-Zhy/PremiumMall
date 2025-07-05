@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>订单详情信息</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/layui/css/layui.css" rel="stylesheet">
+</head>
+<body>
+<div class="layui-padding-3">
+
+    <div class="layui-timeline">
+        <div class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis"></i>
+            <div class="layui-timeline-content layui-text">
+                <h3 class="layui-timeline-title">商家备货中</h3>
+                <p>2025-07-05 11:56:38 商家已接收订单，正在从仓库疯狂备货，打包商品。</p>
+            </div>
+        </div>
+        <div class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis"></i>
+            <div class="layui-timeline-content layui-text">
+                <h3 class="layui-timeline-title">订单已支付</h3>
+                <p>2025-07-05 11:34:34 用户通过 <span style="color: #01aaed; font-weight: bold;">系统测试支付</span> 已支付订单金额，订单信息已发送给商家。</p>
+            </div>
+        </div>
+        <div class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis"></i>
+            <div class="layui-timeline-content layui-text">
+                <h3 class="layui-timeline-title">订单已创建</h3>
+                <p>2025-07-05 11:12:30 用户创建订单。</p>
+            </div>
+        </div>
+        <div class="layui-timeline-item">
+            <i class="layui-icon layui-timeline-axis"></i>
+            <div class="layui-timeline-content layui-text">
+                <div class="layui-timeline-title"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-row">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>订单信息：</legend>
+        </fieldset>
+        <div class="layui-col-xs12 layui-col-sm12 layui-col-md12 layui-col-lg12 layui-col-xl12">
+            <table class="layui-table" lay-size="lg">
+                <thead>
+                <tr>
+                    <th>订单编号：</th>
+                    <th>用户信息：</th>
+                    <th>支付类型：</th>
+                    <th>支付金额：</th>
+                    <th>支付时间：</th>
+                    <th>订单状态：</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>NXU-20250705112233</td>
+                    <td>普通用户-USER-10001</td>
+                    <td>系统测试支付</td>
+                    <td>558.00 元</td>
+                    <td>2025-07-05 11:34:34</td>
+                    <th>已支付</th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="layui-row">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>收货地址信息：</legend>
+        </fieldset>
+        <div class="layui-col-xs12 layui-col-sm12 layui-col-md12 layui-col-lg12 layui-col-xl12">
+            <table class="layui-table" lay-size="lg">
+                <thead>
+                <tr>
+                    <th>收货人：</th>
+                    <th>收货电话：</th>
+                    <th>省份：</th>
+                    <th>城市：</th>
+                    <th>地区：</th>
+                    <th>详细地址：</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>张宏业</td>
+                    <td>18201521341</td>
+                    <td>宁夏回族自治区</td>
+                    <td>银川市</td>
+                    <td>西夏区</td>
+                    <td>宁夏大学怀远校区</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="layui-row">
+        <fieldset class="layui-elem-field layui-field-title">
+            <legend>商品信息：</legend>
+        </fieldset>
+        <div class="layui-col-xs12 layui-col-sm12 layui-col-md12 layui-col-lg12 layui-col-xl12">
+            <table class="layui-table" lay-size="lg">
+                <thead>
+                <tr>
+                    <th>序号：</th>
+                    <th>商品名称：</th>
+                    <th>商品图片：</th>
+                    <th>规格信息：</th>
+                    <th>购买数量：</th>
+                    <th>商品单价：</th>
+                    <th>商品总价：</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>系统测试商品</td>
+                    <td><img src="/image/1.jpg" width="50" height="50"></td>
+                    <td>{"尺码": "M", "材质": "聚酯纤维", "颜色": "紫色"}</td>
+                    <td>2 件</td>
+                    <td>279.00</td>
+                    <td>558.00</td>
+                </tr>
+                <tr>
+                    <td colspan="7" style="text-align: right; font-weight: bold; color: red;">共计：558.00 元</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="layui-row" style="margin-top: 50px;">
+        <a href="/product/index">
+            <button type="submit" class="layui-btn layui-btn-normal layui-btn-fluid" style="font-weight: bold; letter-spacing: 2px;">返 回</button>
+        </a>
+    </div>
+</div>
+<script src="/layui/layui.js"></script>
+<script>
+    layui.use(['form', 'layer', 'jquery'], function (form, layer, $) {
+        layer.msg('下单成功');
+    });
+</script>
+</body>
+</html>

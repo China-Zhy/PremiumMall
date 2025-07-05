@@ -1,6 +1,7 @@
 package com.nxu.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.nxu.apis.ProductApi;
@@ -51,20 +52,20 @@ public class CartServiceImpl extends ServiceImpl<CartMapper, Cart> implements Ca
      */
     @Override
     public boolean updateCart(Cart cart) {
-        QueryWrapper<Cart> queryWrapper = new QueryWrapper<>();
-        if (cart.getId() > 0) {
-            queryWrapper.eq("id", cart.getId());
-        }
+        UpdateWrapper<Cart> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", cart.getId());
+
+        // 动态添加需要更新的字段
         if (cart.getSkuId() > 0) {
-            queryWrapper.eq("sku_id", cart.getSkuId());
+            updateWrapper.set("sku_id", cart.getSkuId());
         }
         if (cart.getQuantity() > 0) {
-            queryWrapper.eq("quantity", cart.getQuantity());
+            updateWrapper.set("quantity", cart.getQuantity());
         }
         if (cart.getSelected() != null) {
-            queryWrapper.eq("selected", cart.getSelected());
+            updateWrapper.set("selected", cart.getSelected());
         }
-        return this.update(queryWrapper);
+        return this.update(updateWrapper);
     }
 
     /**

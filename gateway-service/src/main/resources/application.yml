@@ -15,7 +15,7 @@ spring:
         - id: user-service  # 路由ID，唯一标识
           uri: lb://user-service  # 目标服务地址，lb表示负载均衡
           predicates: # 路由断言，匹配请求路径
-            - Path=/user/**
+            - Path=/user/**,/address/**
         - id: product-service  # 路由ID，唯一标识
           uri: lb://product-service  # 目标服务地址，lb表示负载均衡
           predicates: # 路由断言，匹配请求路径
@@ -28,3 +28,7 @@ spring:
           uri: lb://cart-service  # 目标服务地址，lb表示负载均衡
           predicates: # 路由断言，匹配请求路径
             - Path=/cart/**,/favorites/**
+        - id: order-service  # 路由ID，唯一标识
+          uri: lb://order-service  # 目标服务地址，lb表示负载均衡
+          predicates: # 路由断言，匹配请求路径
+            - Path=/order/**

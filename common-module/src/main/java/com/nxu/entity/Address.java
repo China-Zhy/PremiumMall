@@ -1,5 +1,7 @@
 package com.nxu.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.nxu.enums.YesNoStatus;
 import lombok.Data;
@@ -10,6 +12,7 @@ import lombok.Data;
 @Data
 @TableName("address")
 public class Address {
+    @TableId(type = IdType.AUTO)            // 自增主键
     private long id;                        // 收货地址ID
     private long userId;                    // 用户ID
     private String receiverName;            // 收货人姓名

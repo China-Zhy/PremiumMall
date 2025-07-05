@@ -1,10 +1,71 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="utf-8">
+    <title>我的收藏</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="/layui/css/layui.css" rel="stylesheet">
 </head>
 <body>
+<div class="layui-bg-gray layui-padding-3">
+    <div class="layui-row layui-col-space16">
+        <div class="layui-col-xs12 layui-col-sm6 layui-col-md6 layui-col-lg4 layui-col-xl4" th:each="product : ${products}" th:id="'card'+${product.stock}">
+            <!--收藏的商品卡片列表-->
+            <div class="layui-card layui-anim layui-anim-downbit">
+                <div class="layui-card-header">
+                    <span style="font-weight: bold; font-size: 20px;" th:text="${product.name}"></span>
+                    <div style="float: right;">
+                        <button type="button" class="layui-btn layui-btn-xs layui-btn-danger" lay-on="delete" th:data-favorites-id="${product.stock}">删除</button>
+                    </div>
+                </div>
+                <div class="layui-card-body">
+                    <a th:href="@{/product/productDetail/{id}(id=${product.id})}" target="_blank">
+                        <div class="layui-row layui-col-space20">
+                            <div class="layui-col-xs4 layui-col-sm4 layui-col-md4 layui-col-lg4 layui-col-xl4" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                                <img th:src="${product.mainImage}" style="height: 140px; aspect-ratio: 1/1;" alt="">
+                            </div>
+                            <div class="layui-col-xs8 layui-col-sm8 layui-col-md8 layui-col-lg8 layui-col-xl8" style="padding-left: 10px;">
+                                <h2 th:text="${product.subtitle}" style="color: #16baaa;"></h2>
+                                <p th:text="${product.detail}"></p>
+                                <h1 th:text="${product.price}" style="color: #ff5722;"></h1>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script src="/layui/layui.js"></script>
+<script>
+    layui.use(['layer', 'util', 'jquery'], function (layer, util, $) {
+
+        // 按钮的点击事件
+        util.on('lay-on', {
+            delete: function (data) {
+                layer.confirm('是否从收藏中移除此商品？', {
+                    btn: ['确定', '取消']
+                }, function () {
+                    let id = $(data).data('favorites-id');
+                    $('#card' + id).hide(500); // 0.5秒内逐渐隐藏
+                    $.get('/favorites/delFavorite/' + id, function (res) {
+                        if (res) {
+                            $('#card' + id).hide(500); // 0.5秒内逐渐隐藏
+                            $('#card' + id).remove();   // DOM元素也删除
+                            layer.msg('已移除');
+                        } else {
+                            layer.msg('移除失败');
+                        }
+                    });
+                });
+            }
+        });
+
+        util.fixbar();  // 回到顶部
+    });
+</script>
 </body>
 </html>

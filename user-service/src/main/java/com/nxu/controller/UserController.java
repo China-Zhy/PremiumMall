@@ -1,11 +1,17 @@
 package com.nxu.controller;
 
 import com.nxu.entity.User;
+import com.nxu.service.AreaService;
 import com.nxu.service.UserService;
+import jakarta.servlet.http.HttpSession;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 @Controller
@@ -15,8 +21,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/index")
-    public String index() {
+    @Autowired
+    private AreaService areaService;
+
+    @GetMapping("/index/{id}")
+    public String index(@PathVariable Long id, Model model) {
+        model.addAttribute("userId", id);
         return "index";
     }
 
@@ -82,5 +92,26 @@ public class UserController {
         map.put("count", userService.list().size());
         map.put("data", userService.list());
         return map;
+    }
+
+    // 获取用户个人信息
+    @GetMapping("/getUserInfo/{id}")
+    public String getUserInfo(@PathVariable Long id, Model model) {
+        model.addAttribute("user", userService.getById(id));
+        return "user-info";
+    }
+
+    // 图片上传后转为二进制和base64格式存入数据库
+    @PostMapping("/uploadImage")
+    @ResponseBody
+    public Integer uploadImage(@RequestParam("file") MultipartFile file, HttpSession session) throws IOException {
+        if (!file.isEmpty()) {
+            byte[] binaryData = file.getBytes();
+            session.setAttribute("base64Image", "data:image/jpeg;base64," + Base64.encodeBase64String(binaryData));
+            return 1;
+        } else {
+            System.out.println("警告：上传的图片为空！");
+            return 0;
+        }
     }
 }

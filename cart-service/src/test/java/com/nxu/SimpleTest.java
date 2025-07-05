@@ -19,4 +19,6 @@ public class SimpleTest {
         List<CartDetail> userCartDetail = cartService.getUserCartDetail(1L);
         userCartDetail.forEach(System.out::println);
     }
+
+
 }

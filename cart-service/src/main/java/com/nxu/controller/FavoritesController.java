@@ -17,7 +17,7 @@ public class FavoritesController {
     // 获取用户的收藏信息
     @GetMapping("/getUserFavoritesHtml/{userId}")
     public String getFavoritesHtml(@PathVariable Long userId, Model model) {
-        model.addAttribute("favorites", favoritesService.getFavoritesByUserId(userId));
+        model.addAttribute("products", favoritesService.getFavoritesByUserId(userId));
         return "user-favorites";
     }
 

@@ -18,10 +18,10 @@
                     <div class="layui-col-xs12 layui-col-sm12 layui-col-md12 layui-col-lg12 layui-col-xl12">
 
                         <!--购物车商品列表-->
-                        <div class="layui-card layui-padding-1 layui-anim layui-anim-scale" th:each="detail : ${cartDetail}" th:id="'card'+${detail.cart.id}">
+                        <div class="layui-card layui-padding-1" th:each="detail : ${cartDetail}" th:id="'card'+${detail.cart.id}">
                             <div class="layui-card-header">
                                 <div style="float: left; padding-top: 2px;">
-                                    <input type="checkbox" th:data-product-id="${detail.product.id}" th:checked="${detail.cart.selected.code == 1}">
+                                    <input type="checkbox" th:data-product-id="${detail.product.id}" th:checked="${detail.cart.selected.code == 1}" th:value="${detail.cart.id}">
                                 </div>
                                 <span style="font-weight: bold; font-size: 20px;" th:text="${detail.product.name}"></span>
                                 <div style="float: right;">
@@ -31,7 +31,7 @@
                             <div class="layui-card-body">
                                 <div class="layui-row layui-col-space20">
                                     <div class="layui-col-xs4 layui-col-sm4 layui-col-md4 layui-col-lg4 layui-col-xl4" style="height: 150px; display: flex; align-items: center; justify-content: center;">
-                                        <a th:href="@{/product/productDetail/(${detail.product.id})}" target="_blank"><img th:src="${detail.product.mainImage}" style="height: 140px; aspect-ratio: 1/1;" alt=""></a>
+                                        <a th:href="@{/product/productDetail/{id}(id=${detail.product.id})}" target="_blank"><img th:src="${detail.product.mainImage}" style="height: 140px; aspect-ratio: 1/1;" alt=""></a>
                                     </div>
                                     <div class="layui-col-xs8 layui-col-sm8 layui-col-md8 layui-col-lg8 layui-col-xl8">
 
@@ -87,7 +87,7 @@
 
         // 更新购物车信息
         function updateCart(data) {
-            console.log('更新信息')
+            console.log('更新信息 ' + JSON.stringify(data));
             $.ajax({
                 url: '/cart/updateCart',
                 type: 'POST',
@@ -110,7 +110,7 @@
             if (data.elem.checked) {
                 isSelected = 1;
             } else {
-                isSelected = 0;
+                isSelected = 2;
             }
             calculateTotalPrice();
             cartInfo = {
@@ -169,6 +169,7 @@
                     $.get('/cart/delCart/' + id, function (res) {
                         if (res) {
                             $('#card' + id).hide(500); // 0.5秒内逐渐隐藏
+                            $('#card' + id).remove();   // DOM元素也删除
                             layer.msg('删除成功');
                             calculateTotalPrice();
                         } else {

@@ -25,7 +25,6 @@ public class CartController {
     @PostMapping("/addCart")
     @ResponseBody
     public boolean addCart(@RequestBody Cart cart) {
-        System.out.println("\n添加的购物车信息：" + cart + "\n");
         return cartService.addCart(cart);
     }
 
@@ -40,7 +39,6 @@ public class CartController {
     @PostMapping("/updateCart")
     @ResponseBody
     public boolean updateCart(@RequestBody Cart cart) {
-        System.out.println("\n更新的购物车信息：" + cart + "\n");
         return cartService.updateCart(cart);
     }
 
